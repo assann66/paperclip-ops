@@ -107,9 +107,29 @@ export default function BlogPostPage({
 
   const isRtl = post.lang === 'ar';
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.date,
+    inLanguage: post.lang === 'ar' ? 'ar' : 'en',
+    url: `${siteUrl}/blog/${post.slug}`,
+    publisher: {
+      '@type': 'Organization',
+      name: 'SAD - AI Solutions & Consulting',
+      url: siteUrl,
+    },
+    keywords: post.tags.join(', '),
+  };
+
   return (
     <>
       <Header />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <main className="flex-1">
         <article
           className="py-24"
