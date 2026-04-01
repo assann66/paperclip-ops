@@ -4,7 +4,10 @@ import { Command } from 'commander';
 import { suggestTopics, listAllTopics } from './lib/topics.js';
 import { generateDraft, generateBilingualDrafts } from './lib/drafts.js';
 import { transitionPost, listPosts, getPost } from './lib/workflow.js';
+import { renderPng, parseSpecFile } from './lib/infographic.js';
+import type { InfographicSpec } from './lib/infographic.js';
 import type { Language, PostStatus } from './lib/store.js';
+import { readFileSync } from 'node:fs';
 
 const program = new Command();
 
@@ -183,6 +186,59 @@ program
       console.error(`Cannot reject a post in "${post.status}" status.`);
       process.exit(1);
     }
+  });
+
+// --- Infographic ---
+
+program
+  .command('infographic')
+  .description('Generate an infographic PNG from a JSON spec file')
+  .argument('<spec-file>', 'path to JSON spec file')
+  .option('-o, --output <path>', 'output PNG path', './output/infographic.png')
+  .action(async (specFile, opts) => {
+    try {
+      const spec = parseSpecFile(specFile);
+      console.log(`\nGenerating infographic: ${spec.title.ar} — ${spec.title.en}`);
+      console.log(`  Sections: ${spec.sections.length}`);
+      const outPath = await renderPng(spec, opts.output);
+      console.log(`\n✅ Infographic saved to ${outPath}\n`);
+    } catch (err: any) {
+      console.error(`\nError: ${err.message}\n`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('infographic-batch')
+  .description('Generate infographics from all JSON specs in a directory')
+  .argument('<spec-dir>', 'directory containing JSON spec files')
+  .option('-o, --output-dir <path>', 'output directory for PNGs', './output')
+  .action(async (specDir, opts) => {
+    const { readdirSync } = await import('node:fs');
+    const { join } = await import('node:path');
+
+    const files = readdirSync(specDir).filter((f: string) => f.endsWith('.json'));
+
+    if (files.length === 0) {
+      console.log('\nNo JSON spec files found.\n');
+      return;
+    }
+
+    console.log(`\nProcessing ${files.length} spec files...\n`);
+
+    for (const file of files) {
+      try {
+        const spec = parseSpecFile(join(specDir, file));
+        const outFile = file.replace('.json', '.png');
+        const outPath = join(opts.outputDir, outFile);
+        await renderPng(spec, outPath);
+        console.log(`  ✅ ${file} → ${outFile}`);
+      } catch (err: any) {
+        console.error(`  ❌ ${file}: ${err.message}`);
+      }
+    }
+
+    console.log('\nDone.\n');
   });
 
 program.parse();

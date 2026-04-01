@@ -1,0 +1,61 @@
+{
+  "title": {
+    "ar": "5 أدوار أساسية لبناء فريق الذكاء الاصطناعي",
+    "en": "AI TEAM BUILDING"
+  },
+  "headerColor": "#1B365D",
+  "sections": [
+    {
+      "number": 1,
+      "color": "#2980B9",
+      "icon": "gear",
+      "titleAr": "مهندس تعلم آلي",
+      "titleEn": "ML ENGINEER",
+      "body": "يبني ويدرّب النماذج — العمود الفقري التقني"
+    },
+    {
+      "number": 2,
+      "color": "#27AE60",
+      "icon": "cabinet",
+      "titleAr": "مهندس بيانات",
+      "titleEn": "DATA ENGINEER",
+      "body": "يجهّز خطوط البيانات ويضمن جودتها"
+    },
+    {
+      "number": 3,
+      "color": "#F1C40F",
+      "icon": "tasks",
+      "titleAr": "مدير منتج تقني",
+      "titleEn": "TECHNICAL PM",
+      "body": "يربط الحلول التقنية بأهداف العمل"
+    },
+    {
+      "number": 4,
+      "color": "#E67E22",
+      "icon": "chart",
+      "titleAr": "عالم بيانات",
+      "titleEn": "DATA SCIENTIST",
+      "body": "يحلل البيانات ويكتشف الفرص الجديدة"
+    },
+    {
+      "number": 5,
+      "color": "#E74C3C",
+      "icon": "rocket",
+      "titleAr": "مهندس MLOps",
+      "titleEn": "MLOPS ENGINEER",
+      "body": "يضمن استقرار النماذج في بيئة الإنتاج"
+    }
+  ],
+  "warning": {
+    "background": "#F1C40F",
+    "lines": [
+      "لا تبدأ بمشروع ضخم — ابدأ صغيراً",
+      "لا تعزل فريق AI عن باقي الأقسام",
+      "القاعدة الذهبية: أثبت القيمة خلال 90 يوماً"
+    ]
+  },
+  "footer": {
+    "text": "ابدأ ببناء الفريق الصحيح — النجاح في AI يبدأ بالأشخاص",
+    "background": "#1B365D"
+  }
+}

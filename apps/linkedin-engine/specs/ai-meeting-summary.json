@@ -1,0 +1,45 @@
+{
+  "title": {
+    "ar": "4 خطوات لتلخيص اجتماعاتك بالذكاء الاصطناعي",
+    "en": "AI MEETING SUMMARY"
+  },
+  "headerColor": "#1B365D",
+  "sections": [
+    {
+      "number": 1,
+      "color": "#27AE60",
+      "icon": "microphone",
+      "titleAr": "التسجيل التلقائي",
+      "titleEn": "RECORD",
+      "body": "سجّل الاجتماع تلقائياً — أدوات مثل Otter.ai أو Fireflies تحول الكلام لنص"
+    },
+    {
+      "number": 2,
+      "color": "#2980B9",
+      "icon": "target",
+      "titleAr": "استخراج النقاط",
+      "titleEn": "EXTRACT",
+      "body": "النموذج اللغوي يستخرج القرارات والمهام من النص تلقائياً"
+    },
+    {
+      "number": 3,
+      "color": "#F1C40F",
+      "icon": "checkmark",
+      "titleAr": "توزيع المهام",
+      "titleEn": "ASSIGN",
+      "body": "تحديد المسؤول عن كل مهمة مع المواعيد النهائية"
+    },
+    {
+      "number": 4,
+      "color": "#E67E22",
+      "icon": "chart",
+      "titleAr": "المتابعة الذكية",
+      "titleEn": "FOLLOW-UP",
+      "body": "إرسال ملخص منظم لجميع المشاركين + تذكيرات تلقائية"
+    }
+  ],
+  "footer": {
+    "text": "النتيجة: توفير 30-45 دقيقة يومياً وتقليل المهام المنسية بنسبة 70%",
+    "background": "#1B365D"
+  }
+}

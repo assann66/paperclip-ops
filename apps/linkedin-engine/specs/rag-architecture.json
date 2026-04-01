@@ -1,0 +1,59 @@
+{
+  "title": {
+    "ar": "4 خطوات لربط LLM ببيانات شركتك",
+    "en": "RAG ARCHITECTURE"
+  },
+  "headerColor": "#1B365D",
+  "flowDiagram": {
+    "boxes": [
+      { "label": "استعلام المستخدم", "color": "#2980B9" },
+      { "label": "البحث في Vector DB", "color": "#27AE60" },
+      { "label": "تمرير للنموذج", "color": "#F1C40F" },
+      { "label": "إجابة مخصصة", "color": "#E67E22" }
+    ]
+  },
+  "sections": [
+    {
+      "number": 1,
+      "color": "#2980B9",
+      "icon": "numbers",
+      "titleAr": "تحويل البيانات",
+      "titleEn": "EMBEDDINGS",
+      "body": "حوّل مستنداتك إلى vectors باستخدام نموذج embedding"
+    },
+    {
+      "number": 2,
+      "color": "#27AE60",
+      "icon": "cabinet",
+      "titleAr": "التخزين",
+      "titleEn": "VECTOR DB",
+      "body": "خزّنها في Pinecone أو Weaviate أو pgvector"
+    },
+    {
+      "number": 3,
+      "color": "#F1C40F",
+      "icon": "plug",
+      "titleAr": "طبقة API",
+      "titleEn": "API LAYER",
+      "body": "ابنِ endpoint يستقبل السؤال ويبحث في الـ vectors"
+    },
+    {
+      "number": 4,
+      "color": "#E67E22",
+      "icon": "robot",
+      "titleAr": "تمرير السياق",
+      "titleEn": "CONTEXT PASS",
+      "body": "أضف النتائج كـ context مع السؤال الأصلي للنموذج"
+    }
+  ],
+  "warning": {
+    "background": "#E74C3C",
+    "lines": [
+      "احرص على أمان البيانات — لا ترسل بيانات حساسة لنماذج خارجية بدون تشفير"
+    ]
+  },
+  "footer": {
+    "text": "RAG = أفضل طريقة لربط الذكاء الاصطناعي ببيانات شركتك الخاصة",
+    "background": "#1B365D"
+  }
+}
