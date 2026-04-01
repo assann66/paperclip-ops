@@ -20,6 +20,9 @@ export function Header() {
           <Link href="#contact" className="text-muted hover:text-foreground transition-colors">
             Contact
           </Link>
+          <Link href="/portfolio" className="text-muted hover:text-foreground transition-colors">
+            Portfolio
+          </Link>
           <Link href="/blog" className="text-muted hover:text-foreground transition-colors">
             Insights
           </Link>
