@@ -1,18 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-
-interface AnalysisResult {
-  id: string;
-  type: string;
-  status: string;
-  result: {
-    summary: string;
-    keyFindings: string[];
-    confidence: number;
-  } | null;
-  createdAt: string;
-}
+import type { AnalysisResult } from '@/lib/types';
 
 interface UploadAreaProps {
   onResult: (result: AnalysisResult) => void;
@@ -90,7 +79,11 @@ export function UploadArea({ onResult }: UploadAreaProps) {
         />
       </svg>
       {uploading ? (
-        <p className="text-muted">Analyzing document...</p>
+        <div>
+          <div className="inline-block w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mb-3" />
+          <p className="text-muted">Analyzing document with AI...</p>
+          <p className="text-xs text-muted mt-1">This may take a few seconds</p>
+        </div>
       ) : (
         <>
           <p className="text-lg font-medium mb-2">
@@ -105,7 +98,7 @@ export function UploadArea({ onResult }: UploadAreaProps) {
               />
             </label>
           </p>
-          <p className="text-sm text-muted">Supports PDF, TXT, CSV, and JSON files</p>
+          <p className="text-sm text-muted">Supports PDF, TXT, CSV, and JSON files (up to 10 MB)</p>
         </>
       )}
       {error && <p className="mt-4 text-sm text-danger">{error}</p>}

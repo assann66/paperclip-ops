@@ -3,18 +3,7 @@
 import { useState, useCallback } from 'react';
 import { UploadArea } from '@/components/upload-area';
 import { ResultsDisplay } from '@/components/results-display';
-
-interface AnalysisResult {
-  id: string;
-  type: string;
-  status: string;
-  result: {
-    summary: string;
-    keyFindings: string[];
-    confidence: number;
-  } | null;
-  createdAt: string;
-}
+import type { AnalysisResult } from '@/lib/types';
 
 export default function DashboardPage() {
   const [results, setResults] = useState<AnalysisResult[]>([]);
