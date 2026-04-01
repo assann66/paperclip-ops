@@ -1,6 +1,6 @@
-import type { Language, Post } from "./store.js";
-import { generateId, loadStore, saveStore } from "./store.js";
-import type { Topic } from "./topics.js";
+import type { Language, Post } from './store.js';
+import { generateId, loadStore, saveStore } from './store.js';
+import type { Topic } from './topics.js';
 
 interface DraftTemplates {
   en: (topic: Topic) => string;
@@ -22,7 +22,7 @@ The organizations that thrive in the next decade will be those that embrace ${to
 
 What's your experience with ${topic.theme.toLowerCase()}? I'd love to hear your thoughts in the comments.
 
-#${topic.tags.join(" #")}`,
+#${topic.tags.join(' #')}`,
 
   ar: (topic) => `${topic.title_ar}
 
@@ -38,12 +38,12 @@ What's your experience with ${topic.theme.toLowerCase()}? I'd love to hear your 
 
 \u0645\u0627 \u062a\u062c\u0631\u0628\u062a\u0643\u0645 \u0645\u0639 ${topic.theme.toLowerCase()}\u061f \u0623\u062d\u0628 \u0623\u0646 \u0623\u0633\u0645\u0639 \u0622\u0631\u0627\u0621\u0643\u0645 \u0641\u064a \u0627\u0644\u062a\u0639\u0644\u064a\u0642\u0627\u062a.
 
-#${topic.tags.join(" #")}`,
+#${topic.tags.join(' #')}`,
 };
 
 export function generateDraft(topic: Topic, language: Language): Post {
   const now = new Date().toISOString();
-  const title = language === "en" ? topic.title_en : topic.title_ar;
+  const title = language === 'en' ? topic.title_en : topic.title_ar;
   const body = templates[language](topic);
 
   const post: Post = {
@@ -52,7 +52,7 @@ export function generateDraft(topic: Topic, language: Language): Post {
     title,
     body,
     language,
-    status: "draft",
+    status: 'draft',
     tags: topic.tags,
     createdAt: now,
     updatedAt: now,
@@ -67,7 +67,7 @@ export function generateDraft(topic: Topic, language: Language): Post {
 
 export function generateBilingualDrafts(topic: Topic): { en: Post; ar: Post } {
   return {
-    en: generateDraft(topic, "en"),
-    ar: generateDraft(topic, "ar"),
+    en: generateDraft(topic, 'en'),
+    ar: generateDraft(topic, 'ar'),
   };
 }

@@ -1,11 +1,11 @@
-import type { Post, PostStatus } from "./store.js";
-import { loadStore, saveStore } from "./store.js";
+import type { Post, PostStatus } from './store.js';
+import { loadStore, saveStore } from './store.js';
 
 const VALID_TRANSITIONS: Record<PostStatus, PostStatus[]> = {
-  draft: ["in_review"],
-  in_review: ["draft", "approved"],
-  approved: ["scheduled", "in_review"],
-  scheduled: ["published", "approved"],
+  draft: ['in_review'],
+  in_review: ['draft', 'approved'],
+  approved: ['scheduled', 'in_review'],
+  scheduled: ['published', 'approved'],
   published: [],
 };
 
@@ -20,7 +20,7 @@ export function transitionPost(postId: string, newStatus: PostStatus): Post {
   const allowed = VALID_TRANSITIONS[post.status];
   if (!allowed.includes(newStatus)) {
     throw new Error(
-      `Cannot transition from "${post.status}" to "${newStatus}". Allowed: ${allowed.join(", ") || "none"}`
+      `Cannot transition from "${post.status}" to "${newStatus}". Allowed: ${allowed.join(', ') || 'none'}`,
     );
   }
 

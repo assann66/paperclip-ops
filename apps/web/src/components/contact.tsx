@@ -7,21 +7,14 @@ export function Contact() {
             Let&apos;s Work Together
           </h2>
           <p className="mt-4 text-lg text-muted">
-            Ready to transform your business with AI? Get in touch and
-            let&apos;s discuss how we can help.
+            Ready to transform your business with AI? Get in touch and let&apos;s discuss how we can
+            help.
           </p>
         </div>
-        <form
-          className="mx-auto mt-12 max-w-xl space-y-6"
-          action="#"
-          method="POST"
-        >
+        <form className="mx-auto mt-12 max-w-xl space-y-6" action="#" method="POST">
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium"
-              >
+              <label htmlFor="name" className="block text-sm font-medium">
                 Name
               </label>
               <input
@@ -34,10 +27,7 @@ export function Contact() {
               />
             </div>
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium"
-              >
+              <label htmlFor="email" className="block text-sm font-medium">
                 Email
               </label>
               <input
@@ -51,10 +41,7 @@ export function Contact() {
             </div>
           </div>
           <div>
-            <label
-              htmlFor="subject"
-              className="block text-sm font-medium"
-            >
+            <label htmlFor="subject" className="block text-sm font-medium">
               Subject
             </label>
             <input
@@ -67,10 +54,7 @@ export function Contact() {
             />
           </div>
           <div>
-            <label
-              htmlFor="message"
-              className="block text-sm font-medium"
-            >
+            <label htmlFor="message" className="block text-sm font-medium">
               Message
             </label>
             <textarea

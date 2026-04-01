@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
 export default function GlobalError({
   unstable_retry,
 }: {
-  error: Error & { digest?: string }
-  unstable_retry: () => void
+  error: Error & { digest?: string };
+  unstable_retry: () => void;
 }) {
   return (
     <html>
@@ -13,5 +13,5 @@ export default function GlobalError({
         <button onClick={() => unstable_retry()}>Try again</button>
       </body>
     </html>
-  )
+  );
 }

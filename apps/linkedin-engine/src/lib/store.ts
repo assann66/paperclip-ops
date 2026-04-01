@@ -1,8 +1,8 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
-export type PostStatus = "draft" | "in_review" | "approved" | "scheduled" | "published";
-export type Language = "en" | "ar";
+export type PostStatus = 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published';
+export type Language = 'en' | 'ar';
 
 export interface Post {
   id: string;
@@ -20,8 +20,8 @@ export interface Store {
   posts: Post[];
 }
 
-const DATA_DIR = join(process.cwd(), ".linkedin-engine");
-const STORE_PATH = join(DATA_DIR, "posts.json");
+const DATA_DIR = join(process.cwd(), '.linkedin-engine');
+const STORE_PATH = join(DATA_DIR, 'posts.json');
 
 function ensureDir(): void {
   if (!existsSync(DATA_DIR)) {
@@ -34,7 +34,7 @@ export function loadStore(): Store {
   if (!existsSync(STORE_PATH)) {
     return { posts: [] };
   }
-  return JSON.parse(readFileSync(STORE_PATH, "utf-8")) as Store;
+  return JSON.parse(readFileSync(STORE_PATH, 'utf-8')) as Store;
 }
 
 export function saveStore(store: Store): void {
