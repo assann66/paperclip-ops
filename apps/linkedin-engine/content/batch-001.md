@@ -36,6 +36,7 @@ What's your biggest challenge in building an AI strategy? Let's discuss.
 ---
 
 **Visual Brief:**
+
 - **Format:** Single-image post, 1200x627px
 - **Style:** Clean, professional, dark blue gradient background
 - **Elements:** Bold white headline text "AI Strategy != AI Tools" centered, with a subtle circuit-board pattern overlay. Company logo in bottom-right corner.
@@ -67,11 +68,12 @@ What's your biggest challenge in building an AI strategy? Let's discuss.
 
 ما أكبر تحدٍ تواجهه في بناء استراتيجية الذكاء الاصطناعي؟ شاركني رأيك.
 
-#ذكاء_اصطناعي #استراتيجية #قيادة #تحول_رقمي
+#ذكاء*اصطناعي #استراتيجية #قيادة #تحول*رقمي
 
 ---
 
 **Visual Brief:**
+
 - **Format:** Single-image post, 1200x627px
 - **Style:** Same as Post 1 (brand consistency), RTL text layout
 - **Elements:** Arabic headline "الاستراتيجية أولاً، التقنية ثانياً" in bold white, dark blue gradient, circuit-board pattern. Company logo bottom-left (RTL).
@@ -114,6 +116,7 @@ What process in your business would you automate first? Drop it in the comments.
 ---
 
 **Visual Brief:**
+
 - **Format:** Carousel (3 slides)
 - **Slide 1:** "The Cost of Waiting" — large bold text, hourglass icon with dollar signs falling out, dark gradient background
 - **Slide 2:** Infographic showing "1 Quarter Delay = 3x Cost" with simple bar chart visual
@@ -150,11 +153,12 @@ What process in your business would you automate first? Drop it in the comments.
 
 ما مستوى جاهزية شركتك؟ شاركني تقييمك.
 
-#ذكاء_اصطناعي #تحول_رقمي #أعمال #تقنية
+#ذكاء*اصطناعي #تحول*رقمي #أعمال #تقنية
 
 ---
 
 **Visual Brief:**
+
 - **Format:** Carousel (5 slides + cover)
 - **Cover:** "٥ علامات الجاهزية" — bold Arabic text, checkmark icon, branded colors
 - **Slides 1-5:** One sign per slide, numbered, with simple icon (database, target, people, handshake, chart), consistent dark theme
@@ -196,6 +200,7 @@ What metrics are you using to track your AI investments? Share below — I'm bui
 ---
 
 **Visual Brief:**
+
 - **Format:** Single-image post, 1200x627px
 - **Style:** Professional infographic style
 - **Elements:** Three-layer staircase/pyramid graphic showing "Efficiency (Months 1-3)" at base, "Quality (Months 3-6)" in middle, "Strategic Value (Months 6-12)" at top. Clean lines, branded blues, company logo.
@@ -205,15 +210,16 @@ What metrics are you using to track your AI investments? Share below — I'm bui
 
 ## Batch Summary
 
-| # | Language | Topic | Engine ID | Visual Format |
-|---|----------|-------|-----------|---------------|
-| 1 | EN | AI Strategy | mnfp9ew9kmvgc4 | Single image |
-| 2 | AR | AI Strategy | mnfp9ew9sdy6g3 | Single image |
-| 3 | EN | Digital Transformation | mnfp9fct0z1k2j | Carousel (3) |
-| 4 | AR | AI Integration | mnfp9fte1ywmio | Carousel (6) |
-| 5 | EN | ROI of AI | mnfp9gpc5zjwn9 | Single image |
+| #   | Language | Topic                  | Engine ID      | Visual Format |
+| --- | -------- | ---------------------- | -------------- | ------------- |
+| 1   | EN       | AI Strategy            | mnfp9ew9kmvgc4 | Single image  |
+| 2   | AR       | AI Strategy            | mnfp9ew9sdy6g3 | Single image  |
+| 3   | EN       | Digital Transformation | mnfp9fct0z1k2j | Carousel (3)  |
+| 4   | AR       | AI Integration         | mnfp9fte1ywmio | Carousel (6)  |
+| 5   | EN       | ROI of AI              | mnfp9gpc5zjwn9 | Single image  |
 
 **Next steps:**
+
 1. Founder reviews and edits for personal voice/anecdotes
 2. Visual design team creates graphics per briefs above
 3. Approve via engine: `npx tsx apps/linkedin-engine/src/cli.ts review <post-id>`
