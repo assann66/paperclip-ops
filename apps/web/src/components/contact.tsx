@@ -1,17 +1,95 @@
+'use client';
+
+import { useState } from 'react';
+
 export function Contact() {
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setStatus('submitting');
+    setErrorMessage('');
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      company: formData.get('company'),
+      message: formData.get('message'),
+    };
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const result = await res.json();
+        throw new Error(result.error || 'Submission failed.');
+      }
+
+      setStatus('success');
+      form.reset();
+    } catch (err) {
+      setStatus('error');
+      setErrorMessage(err instanceof Error ? err.message : 'Something went wrong.');
+    }
+  }
+
+  if (status === 'success') {
+    return (
+      <section id="contact" className="bg-card py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mx-auto max-w-xl text-center">
+            <div className="mb-6 flex justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="h-8 w-8 text-green-600"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Thank You!
+            </h2>
+            <p className="mt-4 text-lg text-muted">
+              We&apos;ve received your inquiry and will get back to you within 1-2 business days.
+            </p>
+            <button
+              onClick={() => setStatus('idle')}
+              className="mt-8 inline-block rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark"
+            >
+              Send Another Message
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="contact" className="bg-card py-24">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Let&apos;s Work Together
+            Book a Consultation
           </h2>
           <p className="mt-4 text-lg text-muted">
-            Ready to transform your business with AI? Get in touch and let&apos;s discuss how we can
-            help.
+            Ready to transform your business with AI? Tell us about your needs and we&apos;ll
+            be in touch to schedule a consultation.
           </p>
         </div>
-        <form className="mx-auto mt-12 max-w-xl space-y-6" action="#" method="POST">
+        <form className="mx-auto mt-12 max-w-xl space-y-6" onSubmit={handleSubmit}>
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
               <label htmlFor="name" className="block text-sm font-medium">
@@ -41,21 +119,21 @@ export function Contact() {
             </div>
           </div>
           <div>
-            <label htmlFor="subject" className="block text-sm font-medium">
-              Subject
+            <label htmlFor="company" className="block text-sm font-medium">
+              Company
             </label>
             <input
               type="text"
-              id="subject"
-              name="subject"
+              id="company"
+              name="company"
               required
               className="mt-2 block w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
-              placeholder="How can we help?"
+              placeholder="Your company name"
             />
           </div>
           <div>
             <label htmlFor="message" className="block text-sm font-medium">
-              Message
+              How can we help?
             </label>
             <textarea
               id="message"
@@ -63,14 +141,18 @@ export function Contact() {
               rows={5}
               required
               className="mt-2 block w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary resize-none"
-              placeholder="Tell us about your project..."
+              placeholder="Tell us about your project, goals, and any specific challenges you're facing..."
             />
           </div>
+          {status === 'error' && (
+            <p className="text-sm text-red-600">{errorMessage}</p>
+          )}
           <button
             type="submit"
-            className="w-full rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark"
+            disabled={status === 'submitting'}
+            className="w-full rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Send Message
+            {status === 'submitting' ? 'Sending...' : 'Book a Consultation'}
           </button>
         </form>
       </div>
