@@ -7,7 +7,12 @@ import { transitionPost, listPosts, getPost } from './lib/workflow.js';
 import { renderPng, parseSpecFile } from './lib/infographic.js';
 import type { InfographicSpec } from './lib/infographic.js';
 import type { Language, PostStatus } from './lib/store.js';
-import { readFileSync } from 'node:fs';
+import {
+  verifyCredentials,
+  postText,
+  postWithImage,
+} from './lib/linkedin-api.js';
+import { readFileSync, existsSync } from 'node:fs';
 
 const program = new Command();
 
@@ -239,6 +244,103 @@ program
     }
 
     console.log('\nDone.\n');
+  });
+
+// --- LinkedIn API ---
+
+program
+  .command('verify')
+  .description('Verify LinkedIn API credentials')
+  .action(async () => {
+    try {
+      const sub = await verifyCredentials();
+      console.log(`\n✅ LinkedIn credentials valid. User: ${sub}\n`);
+    } catch (err: any) {
+      console.error(`\n❌ ${err.message}\n`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('post')
+  .description('Publish a post to LinkedIn (text only or text + image)')
+  .argument('<post-id>', 'post ID from the content store')
+  .option('-i, --image <path>', 'path to image file to attach')
+  .option('--dry-run', 'print what would be posted without actually posting')
+  .action(async (postId, opts) => {
+    const post = getPost(postId);
+    if (!post) {
+      console.error(`Post not found: ${postId}`);
+      process.exit(1);
+    }
+
+    if (post.status !== 'scheduled' && post.status !== 'approved') {
+      console.error(
+        `Post must be 'approved' or 'scheduled' to publish. Current status: ${post.status}`,
+      );
+      process.exit(1);
+    }
+
+    const text = post.body;
+
+    if (opts.dryRun) {
+      console.log('\n--- DRY RUN ---');
+      console.log(`Title: ${post.title}`);
+      console.log(`Language: ${post.language}`);
+      console.log(`Image: ${opts.image ?? 'none'}`);
+      console.log(`\nBody:\n${text}\n`);
+      return;
+    }
+
+    try {
+      if (opts.image) {
+        if (!existsSync(opts.image)) {
+          console.error(`Image file not found: ${opts.image}`);
+          process.exit(1);
+        }
+        console.log(`\nPublishing to LinkedIn with image...`);
+        const result = await postWithImage(text, opts.image, post.title);
+        console.log(`\n🚀 Published! Post ID: ${result.id}`);
+        console.log(`   Image asset: ${result.imageAsset}`);
+      } else {
+        console.log(`\nPublishing to LinkedIn (text only)...`);
+        const result = await postText(text);
+        console.log(`\n🚀 Published! Post ID: ${result.id}`);
+      }
+
+      // Mark as published in local store
+      transitionPost(postId, 'published');
+      console.log(`   Local status updated to 'published'\n`);
+    } catch (err: any) {
+      console.error(`\n❌ ${err.message}\n`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('post-direct')
+  .description('Post arbitrary text directly to LinkedIn (bypasses content store)')
+  .argument('<text>', 'text content to post')
+  .option('-i, --image <path>', 'path to image file to attach')
+  .action(async (text, opts) => {
+    try {
+      if (opts.image) {
+        if (!existsSync(opts.image)) {
+          console.error(`Image file not found: ${opts.image}`);
+          process.exit(1);
+        }
+        console.log(`\nPublishing to LinkedIn with image...`);
+        const result = await postWithImage(text, opts.image);
+        console.log(`\n🚀 Published! Post ID: ${result.id}\n`);
+      } else {
+        console.log(`\nPublishing to LinkedIn (text only)...`);
+        const result = await postText(text);
+        console.log(`\n🚀 Published! Post ID: ${result.id}\n`);
+      }
+    } catch (err: any) {
+      console.error(`\n❌ ${err.message}\n`);
+      process.exit(1);
+    }
   });
 
 program.parse();
