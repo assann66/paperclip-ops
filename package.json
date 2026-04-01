@@ -8,9 +8,13 @@
   "scripts": {
     "dev": "npm run dev --workspace=apps/web",
     "build": "npm run build --workspace=apps/web",
-    "lint": "npm run lint --workspace=apps/web"
+    "build:all": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspace=apps/web",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   }
 }

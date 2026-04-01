@@ -7,7 +7,7 @@
     "linkedin-engine": "./dist/cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npx tsc",
     "dev": "tsx src/cli.ts",
     "start": "node dist/cli.js"
   },
