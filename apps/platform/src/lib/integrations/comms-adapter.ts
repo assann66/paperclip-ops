@@ -1,9 +1,4 @@
-import type {
-  CommsAdapter,
-  Message,
-  IntegrationConfig,
-  IntegrationInfo,
-} from './types';
+import type { CommsAdapter, Message, IntegrationConfig, IntegrationInfo } from './types';
 
 const MOCK_MESSAGES: Message[] = [
   {

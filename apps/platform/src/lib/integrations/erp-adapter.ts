@@ -1,15 +1,30 @@
-import type {
-  ErpAdapter,
-  ErpProduct,
-  ErpOrder,
-  IntegrationConfig,
-  IntegrationInfo,
-} from './types';
+import type { ErpAdapter, ErpProduct, ErpOrder, IntegrationConfig, IntegrationInfo } from './types';
 
 const MOCK_PRODUCTS: ErpProduct[] = [
-  { id: 'p1', name: 'Document Analysis — Starter', sku: 'DA-START', price: 500, quantity: 999, category: 'SaaS' },
-  { id: 'p2', name: 'Document Analysis — Enterprise', sku: 'DA-ENT', price: 4000, quantity: 999, category: 'SaaS' },
-  { id: 'p3', name: 'Integration Gateway — Per Connector', sku: 'IG-CONN', price: 200, quantity: 999, category: 'Add-on' },
+  {
+    id: 'p1',
+    name: 'Document Analysis — Starter',
+    sku: 'DA-START',
+    price: 500,
+    quantity: 999,
+    category: 'SaaS',
+  },
+  {
+    id: 'p2',
+    name: 'Document Analysis — Enterprise',
+    sku: 'DA-ENT',
+    price: 4000,
+    quantity: 999,
+    category: 'SaaS',
+  },
+  {
+    id: 'p3',
+    name: 'Integration Gateway — Per Connector',
+    sku: 'IG-CONN',
+    price: 200,
+    quantity: 999,
+    category: 'Add-on',
+  },
 ];
 
 const MOCK_ORDERS: ErpOrder[] = [

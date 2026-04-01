@@ -24,7 +24,10 @@ const statusColors: Record<string, string> = {
 export default function IntegrationsPage() {
   const [integrations, setIntegrations] = useState<IntegrationInfo[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
-  const [detail, setDetail] = useState<{ info: IntegrationInfo; data: Record<string, unknown[]> } | null>(null);
+  const [detail, setDetail] = useState<{
+    info: IntegrationInfo;
+    data: Record<string, unknown[]>;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,9 +61,7 @@ export default function IntegrationsPage() {
     <div className="p-8 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Integrations</h1>
-        <p className="text-muted mt-1">
-          Connect your business tools to the AI platform.
-        </p>
+        <p className="text-muted mt-1">Connect your business tools to the AI platform.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -81,9 +82,7 @@ export default function IntegrationsPage() {
                 {categoryLabels[integration.category] ?? integration.category}
               </span>
               <span className="flex items-center gap-1.5 text-xs text-muted">
-                <span
-                  className={`w-2 h-2 rounded-full ${statusColors[integration.status]}`}
-                />
+                <span className={`w-2 h-2 rounded-full ${statusColors[integration.status]}`} />
                 {integration.status}
               </span>
             </div>
@@ -100,9 +99,7 @@ export default function IntegrationsPage() {
 
       {detail && (
         <div className="border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4">
-            {detail.info.name} — Data Preview
-          </h2>
+          <h2 className="text-lg font-semibold mb-4">{detail.info.name} — Data Preview</h2>
           {Object.entries(detail.data).map(([key, rows]) => (
             <div key={key} className="mb-6 last:mb-0">
               <h3 className="text-sm font-medium text-muted uppercase tracking-wide mb-2">
@@ -112,30 +109,23 @@ export default function IntegrationsPage() {
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-border">
-                      {Object.keys((rows as Record<string, unknown>[])[0] ?? {}).map(
-                        (col) => (
-                          <th
-                            key={col}
-                            className="text-left py-2 px-3 font-medium text-muted"
-                          >
-                            {col}
-                          </th>
-                        ),
-                      )}
+                      {Object.keys((rows as Record<string, unknown>[])[0] ?? {}).map((col) => (
+                        <th key={col} className="text-left py-2 px-3 font-medium text-muted">
+                          {col}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {(rows as Record<string, unknown>[]).map(
-                      (row, i) => (
-                        <tr key={i} className="border-b border-border/50">
-                          {Object.values(row).map((val, j) => (
-                            <td key={j} className="py-2 px-3">
-                              {typeof val === 'object' ? JSON.stringify(val) : String(val ?? '')}
-                            </td>
-                          ))}
-                        </tr>
-                      ),
-                    )}
+                    {(rows as Record<string, unknown>[]).map((row, i) => (
+                      <tr key={i} className="border-b border-border/50">
+                        {Object.values(row).map((val, j) => (
+                          <td key={j} className="py-2 px-3">
+                            {typeof val === 'object' ? JSON.stringify(val) : String(val ?? '')}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

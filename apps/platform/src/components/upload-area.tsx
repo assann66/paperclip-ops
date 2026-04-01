@@ -98,7 +98,9 @@ export function UploadArea({ onResult }: UploadAreaProps) {
               />
             </label>
           </p>
-          <p className="text-sm text-muted">Supports PDF, DOCX, TXT, CSV, and JSON files (up to 10 MB)</p>
+          <p className="text-sm text-muted">
+            Supports PDF, DOCX, TXT, CSV, and JSON files (up to 10 MB)
+          </p>
         </>
       )}
       {error && <p className="mt-4 text-sm text-danger">{error}</p>}

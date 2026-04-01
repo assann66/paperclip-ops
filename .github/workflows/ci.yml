@@ -26,6 +26,9 @@ jobs:
       - name: Build web
         run: npm run build
 
+      - name: Build platform
+        run: npm run build:platform
+
       - name: Build linkedin-engine
         run: npm run build --workspace=apps/linkedin-engine
 

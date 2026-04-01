@@ -1,10 +1,4 @@
-import type {
-  CrmAdapter,
-  CrmContact,
-  CrmDeal,
-  IntegrationConfig,
-  IntegrationInfo,
-} from './types';
+import type { CrmAdapter, CrmContact, CrmDeal, IntegrationConfig, IntegrationInfo } from './types';
 
 const MOCK_CONTACTS: CrmContact[] = [
   {

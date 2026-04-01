@@ -53,7 +53,10 @@ async function extractText(file: File): Promise<string> {
     }
 
     // Fallback: return any printable text found in the file
-    return raw.replace(/[^\x20-\x7E\n\r\t]/g, ' ').replace(/\s{3,}/g, '\n').trim();
+    return raw
+      .replace(/[^\x20-\x7E\n\r\t]/g, ' ')
+      .replace(/\s{3,}/g, '\n')
+      .trim();
   }
   // Text-based formats
   return await file.text();
@@ -91,17 +94,11 @@ export async function POST(request: Request) {
   }
 
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return Response.json(
-      { error: `Unsupported file type: ${file.type}` },
-      { status: 400 },
-    );
+    return Response.json({ error: `Unsupported file type: ${file.type}` }, { status: 400 });
   }
 
   if (file.size > MAX_FILE_SIZE) {
-    return Response.json(
-      { error: 'File too large. Maximum size is 10 MB.' },
-      { status: 400 },
-    );
+    return Response.json({ error: 'File too large. Maximum size is 10 MB.' }, { status: 400 });
   }
 
   let text: string;
@@ -115,10 +112,7 @@ export async function POST(request: Request) {
   }
 
   if (!text.trim()) {
-    return Response.json(
-      { error: 'No readable text found in the file.' },
-      { status: 422 },
-    );
+    return Response.json({ error: 'No readable text found in the file.' }, { status: 422 });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY || process.env.MATON_API_KEY;
@@ -136,9 +130,7 @@ export async function POST(request: Request) {
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2048,
-      messages: [
-        { role: 'user', content: getAnalysisPrompt(text, file.name) },
-      ],
+      messages: [{ role: 'user', content: getAnalysisPrompt(text, file.name) }],
     });
 
     const content = message.content[0];
@@ -148,10 +140,7 @@ export async function POST(request: Request) {
     analysis = JSON.parse(content.text);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
-    return Response.json(
-      { error: `AI analysis failed: ${msg}` },
-      { status: 502 },
-    );
+    return Response.json({ error: `AI analysis failed: ${msg}` }, { status: 502 });
   }
 
   const result = addAnalysisResult({

@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAdapter } from '@/lib/integrations';
 import type { CrmAdapter, ErpAdapter, CommsAdapter } from '@/lib/integrations';
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const adapter = getAdapter(id);
   if (!adapter) {
