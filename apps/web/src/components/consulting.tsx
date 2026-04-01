@@ -33,9 +33,7 @@ export function Consulting() {
     <section id="consulting" className="py-24">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Consulting Services
-          </h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Consulting Services</h2>
           <p className="mt-4 text-lg text-muted">
             Partner with our team to unlock the full potential of AI for your organization
           </p>
@@ -49,9 +47,9 @@ export function Consulting() {
           <h3 className="text-xl font-semibold">Who We Work With</h3>
           <p className="mt-3 text-muted leading-7">
             We partner with mid-market companies and enterprise teams looking to adopt AI
-            strategically — not just experiment with it. Whether you are starting your AI
-            journey or scaling existing capabilities, we meet you where you are and help you
-            move faster with confidence.
+            strategically — not just experiment with it. Whether you are starting your AI journey or
+            scaling existing capabilities, we meet you where you are and help you move faster with
+            confidence.
           </p>
         </div>
 

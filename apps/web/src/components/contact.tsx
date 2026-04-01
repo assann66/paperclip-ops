@@ -3,41 +3,26 @@
 import { useState } from 'react';
 
 export function Contact() {
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [status, setStatus] = useState<'idle' | 'success'>('idle');
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setStatus('submitting');
-    setErrorMessage('');
 
     const form = e.currentTarget;
     const formData = new FormData(form);
-    const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      company: formData.get('company'),
-      message: formData.get('message'),
-    };
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+    const company = formData.get('company') as string;
+    const message = formData.get('message') as string;
 
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+    const subject = encodeURIComponent(`Consultation Request from ${name} — ${company}`);
+    const body = encodeURIComponent(
+      `Name: ${name}\nEmail: ${email}\nCompany: ${company}\n\n${message}`,
+    );
 
-      if (!res.ok) {
-        const result = await res.json();
-        throw new Error(result.error || 'Submission failed.');
-      }
-
-      setStatus('success');
-      form.reset();
-    } catch (err) {
-      setStatus('error');
-      setErrorMessage(err instanceof Error ? err.message : 'Something went wrong.');
-    }
+    window.open(`mailto:contact@sad.sa?subject=${subject}&body=${body}`);
+    setStatus('success');
+    form.reset();
   }
 
   if (status === 'success') {
@@ -59,11 +44,10 @@ export function Contact() {
                 </svg>
               </div>
             </div>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Thank You!
-            </h2>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Thank You!</h2>
             <p className="mt-4 text-lg text-muted">
-              We&apos;ve received your inquiry and will get back to you within 1-2 business days.
+              Your email client should have opened with your inquiry. Send the email and we&apos;ll
+              get back to you within 1-2 business days.
             </p>
             <button
               onClick={() => setStatus('idle')}
@@ -81,12 +65,10 @@ export function Contact() {
     <section id="contact" className="bg-card py-24">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Book a Consultation
-          </h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Book a Consultation</h2>
           <p className="mt-4 text-lg text-muted">
-            Ready to transform your business with AI? Tell us about your needs and we&apos;ll
-            be in touch to schedule a consultation.
+            Ready to transform your business with AI? Tell us about your needs and we&apos;ll be in
+            touch to schedule a consultation.
           </p>
         </div>
         <form className="mx-auto mt-12 max-w-xl space-y-6" onSubmit={handleSubmit}>
@@ -144,15 +126,11 @@ export function Contact() {
               placeholder="Tell us about your project, goals, and any specific challenges you're facing..."
             />
           </div>
-          {status === 'error' && (
-            <p className="text-sm text-red-600">{errorMessage}</p>
-          )}
           <button
             type="submit"
-            disabled={status === 'submitting'}
-            className="w-full rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark"
           >
-            {status === 'submitting' ? 'Sending...' : 'Book a Consultation'}
+            Book a Consultation
           </button>
         </form>
       </div>
