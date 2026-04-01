@@ -20,6 +20,12 @@ export function Header() {
           <Link href="#contact" className="text-muted hover:text-foreground transition-colors">
             Contact
           </Link>
+          <Link
+            href="/demo"
+            className="text-primary hover:text-primary-dark transition-colors font-semibold"
+          >
+            Live Demo
+          </Link>
         </nav>
         <Link
           href="#contact"
