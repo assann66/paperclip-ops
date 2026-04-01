@@ -93,12 +93,12 @@ export function UploadArea({ onResult }: UploadAreaProps) {
               <input
                 type="file"
                 className="hidden"
-                accept=".pdf,.txt,.csv,.json"
+                accept=".pdf,.docx,.txt,.csv,.json"
                 onChange={handleChange}
               />
             </label>
           </p>
-          <p className="text-sm text-muted">Supports PDF, TXT, CSV, and JSON files (up to 10 MB)</p>
+          <p className="text-sm text-muted">Supports PDF, DOCX, TXT, CSV, and JSON files (up to 10 MB)</p>
         </>
       )}
       {error && <p className="mt-4 text-sm text-danger">{error}</p>}

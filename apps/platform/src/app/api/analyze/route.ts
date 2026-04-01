@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import mammoth from 'mammoth';
 import { getCurrentUser } from '@/lib/auth';
 import { addAnalysisResult } from '@/lib/db';
 
@@ -7,11 +8,17 @@ const ALLOWED_TYPES = [
   'text/plain',
   'text/csv',
   'application/json',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ];
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 async function extractText(file: File): Promise<string> {
+  if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ buffer: Buffer.from(arrayBuffer) });
+    return result.value;
+  }
   if (file.type === 'application/pdf') {
     // For PDF: extract readable text from the raw bytes.
     // This handles simple text-based PDFs. For complex PDFs with

@@ -7,6 +7,49 @@ interface ResultsDisplayProps {
   results: AnalysisResult[];
 }
 
+function DownloadPdfButton({ result }: { result: AnalysisResultData }) {
+  const handleDownload = () => {
+    const text = formatResultAsText(result);
+    // Open a print-friendly window for PDF export
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`<!DOCTYPE html>
+<html><head><title>Document Analysis</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 700px; margin: 40px auto; padding: 20px; color: #1a1a1a; line-height: 1.6; }
+  h1 { font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 8px; }
+  h2 { font-size: 16px; margin-top: 24px; color: #444; }
+  ul { padding-left: 20px; }
+  li { margin-bottom: 4px; }
+  .meta { font-size: 12px; color: #888; margin-top: 32px; border-top: 1px solid #ddd; padding-top: 8px; }
+  @media print { body { margin: 0; } }
+</style></head><body>
+<h1>Document Analysis Report</h1>
+${result.documentType ? `<p><strong>Type:</strong> ${result.documentType}</p>` : ''}
+<h2>Executive Summary</h2><p>${result.summary}</p>
+<h2>Key Findings</h2><ul>${result.keyFindings.map(f => `<li>${f}</li>`).join('')}</ul>
+${result.actionItems?.length ? `<h2>Action Items</h2><ul>${result.actionItems.map(a => `<li>${a}</li>`).join('')}</ul>` : ''}
+${result.riskAssessment ? `<h2>Risk Assessment</h2><p>${result.riskAssessment}</p>` : ''}
+${result.suggestedNextSteps?.length ? `<h2>Suggested Next Steps</h2><ul>${result.suggestedNextSteps.map(s => `<li>${s}</li>`).join('')}</ul>` : ''}
+<div class="meta">Confidence: ${(result.confidence * 100).toFixed(0)}% &middot; Generated ${new Date().toLocaleString()}</div>
+</body></html>`);
+    win.document.close();
+    win.print();
+  };
+
+  return (
+    <button
+      onClick={handleDownload}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-border hover:bg-primary/5 transition-colors"
+    >
+      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      PDF
+    </button>
+  );
+}
+
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -107,6 +150,7 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
               </span>
             </div>
             <div className="flex items-center gap-3">
+              {result.result && <DownloadPdfButton result={result.result} />}
               {result.result && <CopyButton text={formatResultAsText(result.result)} />}
               <span className="text-xs text-muted">
                 {new Date(result.createdAt).toLocaleString()}
