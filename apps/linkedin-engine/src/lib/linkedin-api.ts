@@ -1,45 +1,95 @@
 /**
- * LinkedIn API client for posting content.
+ * LinkedIn API client via MATON Gateway.
  *
- * Uses LinkedIn's REST API v2 with OAuth2 Bearer token.
- * Token can come from MATON connection or direct LinkedIn developer app.
+ * Routes LinkedIn REST API calls through gateway.maton.ai, which handles
+ * OAuth token injection automatically based on the authorized MATON connection.
  *
  * Required env vars:
- *   LINKEDIN_ACCESS_TOKEN — OAuth2 token with w_member_social scope
- *   LINKEDIN_PERSON_URN   — e.g. "urn:li:person:xxxxx" (your LinkedIn member URN)
+ *   MATON_API_KEY — MATON API key for gateway authentication
+ *
+ * Optional env vars:
+ *   MATON_LINKEDIN_CONNECTION_ID — specific connection ID (if multiple LinkedIn connections)
  */
 
 import { readFileSync } from 'node:fs';
 
-const API_BASE = 'https://api.linkedin.com';
+const GATEWAY_BASE = 'https://gateway.maton.ai/linkedin';
+const CTRL_BASE = 'https://ctrl.maton.ai';
 
-function getConfig() {
-  const accessToken = process.env['LINKEDIN_ACCESS_TOKEN'];
-  const personUrn = process.env['LINKEDIN_PERSON_URN'];
-
-  if (!accessToken) {
-    throw new Error(
-      'LINKEDIN_ACCESS_TOKEN not set. Provide an OAuth2 token with w_member_social scope.',
-    );
+function getApiKey(): string {
+  const key = process.env['MATON_API_KEY'];
+  if (!key) {
+    throw new Error('MATON_API_KEY not set. Required for LinkedIn API access via MATON gateway.');
   }
-  if (!personUrn) {
-    throw new Error(
-      'LINKEDIN_PERSON_URN not set. Set it to your LinkedIn member URN (e.g. urn:li:person:xxxxx).',
-    );
-  }
-
-  return { accessToken, personUrn };
+  return key;
 }
 
-function headers(token: string, extra: Record<string, string> = {}): Record<string, string> {
-  return {
-    Authorization: `Bearer ${token}`,
+function headers(extra: Record<string, string> = {}): Record<string, string> {
+  const h: Record<string, string> = {
+    Authorization: `Bearer ${getApiKey()}`,
     'Content-Type': 'application/json',
     'X-Restli-Protocol-Version': '2.0.0',
     'LinkedIn-Version': '202401',
     ...extra,
   };
+  const connId = process.env['MATON_LINKEDIN_CONNECTION_ID'];
+  if (connId) {
+    h['x-maton-connection-id'] = connId;
+  }
+  return h;
 }
+
+// ---------------------------------------------------------------------------
+// Connection management
+// ---------------------------------------------------------------------------
+
+export interface LinkedInConnection {
+  connection_id: string;
+  status: string;
+  url: string;
+  app: string;
+  metadata: Record<string, any>;
+}
+
+/** Check LinkedIn connection status in MATON. */
+export async function getConnectionStatus(): Promise<LinkedInConnection | null> {
+  const res = await fetch(`${CTRL_BASE}/connections?app=linkedin`, {
+    headers: { Authorization: `Bearer ${getApiKey()}` },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to check LinkedIn connections: ${res.status}`);
+  }
+  const data = (await res.json()) as { connections: LinkedInConnection[] };
+  const active = data.connections.find((c) => c.status === 'ACTIVE');
+  return active ?? data.connections[0] ?? null;
+}
+
+/** Create a new LinkedIn connection in MATON. Returns the OAuth authorization URL. */
+export async function createConnection(): Promise<{ connectionId: string; authUrl: string }> {
+  const res = await fetch(`${CTRL_BASE}/connections`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${getApiKey()}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ app: 'linkedin' }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to create LinkedIn connection: ${res.status}`);
+  }
+  const data = (await res.json()) as { connection_id: string };
+
+  // Fetch the connection to get the auth URL
+  const connRes = await fetch(`${CTRL_BASE}/connections/${data.connection_id}`, {
+    headers: { Authorization: `Bearer ${getApiKey()}` },
+  });
+  const connData = (await connRes.json()) as { connection: LinkedInConnection };
+  return { connectionId: data.connection_id, authUrl: connData.connection.url };
+}
+
+// ---------------------------------------------------------------------------
+// Profile
+// ---------------------------------------------------------------------------
 
 export interface LinkedInProfile {
   sub: string;
@@ -47,12 +97,10 @@ export interface LinkedInProfile {
   email?: string;
 }
 
-/** Fetch the authenticated user's profile to verify token and get person URN. */
+/** Fetch the authenticated user's profile to verify connection. */
 export async function getProfile(): Promise<LinkedInProfile> {
-  const { accessToken } = getConfig();
-
-  const res = await fetch(`${API_BASE}/v2/userinfo`, {
-    headers: headers(accessToken),
+  const res = await fetch(`${GATEWAY_BASE}/v2/userinfo`, {
+    headers: headers(),
   });
 
   if (!res.ok) {
@@ -63,16 +111,18 @@ export async function getProfile(): Promise<LinkedInProfile> {
   return (await res.json()) as LinkedInProfile;
 }
 
+// ---------------------------------------------------------------------------
+// Posting
+// ---------------------------------------------------------------------------
+
 export interface TextPostResult {
   id: string;
 }
 
 /** Post a text-only update to LinkedIn. */
-export async function postText(text: string): Promise<TextPostResult> {
-  const { accessToken, personUrn } = getConfig();
-
+export async function postText(text: string, authorUrn: string): Promise<TextPostResult> {
   const payload = {
-    author: personUrn,
+    author: authorUrn,
     lifecycleState: 'PUBLISHED',
     specificContent: {
       'com.linkedin.ugc.ShareContent': {
@@ -85,9 +135,9 @@ export async function postText(text: string): Promise<TextPostResult> {
     },
   };
 
-  const res = await fetch(`${API_BASE}/v2/ugcPosts`, {
+  const res = await fetch(`${GATEWAY_BASE}/v2/ugcPosts`, {
     method: 'POST',
-    headers: headers(accessToken),
+    headers: headers(),
     body: JSON.stringify(payload),
   });
 
@@ -100,15 +150,13 @@ export async function postText(text: string): Promise<TextPostResult> {
   return { id };
 }
 
-/** Register an image upload, upload the binary, then return the media asset URN. */
-async function uploadImage(imagePath: string): Promise<string> {
-  const { accessToken, personUrn } = getConfig();
-
-  // Step 1: Register upload
+/** Register an image upload via the gateway, upload the binary directly to LinkedIn's CDN. */
+async function uploadImage(imagePath: string, ownerUrn: string): Promise<string> {
+  // Step 1: Register upload through gateway
   const registerPayload = {
     registerUploadRequest: {
       recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
-      owner: personUrn,
+      owner: ownerUrn,
       serviceRelationships: [
         {
           relationshipType: 'OWNER',
@@ -118,9 +166,9 @@ async function uploadImage(imagePath: string): Promise<string> {
     },
   };
 
-  const regRes = await fetch(`${API_BASE}/v2/assets?action=registerUpload`, {
+  const regRes = await fetch(`${GATEWAY_BASE}/v2/assets?action=registerUpload`, {
     method: 'POST',
-    headers: headers(accessToken),
+    headers: headers(),
     body: JSON.stringify(registerPayload),
   });
 
@@ -136,12 +184,11 @@ async function uploadImage(imagePath: string): Promise<string> {
     ].uploadUrl;
   const asset = regData.value.asset as string;
 
-  // Step 2: Upload binary
+  // Step 2: Upload binary directly to LinkedIn's CDN (NOT through the gateway)
   const imageBuffer = readFileSync(imagePath);
   const upRes = await fetch(uploadUrl, {
     method: 'PUT',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/octet-stream',
     },
     body: imageBuffer,
@@ -164,14 +211,13 @@ export interface ImagePostResult {
 export async function postWithImage(
   text: string,
   imagePath: string,
+  authorUrn: string,
   imageTitle?: string,
 ): Promise<ImagePostResult> {
-  const { accessToken, personUrn } = getConfig();
-
-  const imageAsset = await uploadImage(imagePath);
+  const imageAsset = await uploadImage(imagePath, authorUrn);
 
   const payload = {
-    author: personUrn,
+    author: authorUrn,
     lifecycleState: 'PUBLISHED',
     specificContent: {
       'com.linkedin.ugc.ShareContent': {
@@ -191,9 +237,9 @@ export async function postWithImage(
     },
   };
 
-  const res = await fetch(`${API_BASE}/v2/ugcPosts`, {
+  const res = await fetch(`${GATEWAY_BASE}/v2/ugcPosts`, {
     method: 'POST',
-    headers: headers(accessToken),
+    headers: headers(),
     body: JSON.stringify(payload),
   });
 
@@ -207,7 +253,7 @@ export async function postWithImage(
 }
 
 /** Verify credentials by fetching profile. Returns person URN sub. */
-export async function verifyCredentials(): Promise<string> {
+export async function verifyCredentials(): Promise<{ sub: string; name: string }> {
   const profile = await getProfile();
-  return profile.sub;
+  return { sub: profile.sub, name: profile.name };
 }

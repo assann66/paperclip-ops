@@ -11,7 +11,14 @@ import {
   verifyCredentials,
   postText,
   postWithImage,
+  getConnectionStatus,
+  createConnection,
 } from './lib/linkedin-api.js';
+import {
+  verifyGmailCredentials,
+  sendEmail,
+} from './lib/gmail-api.js';
+import { welcomeEmail, newsletterEmail } from './lib/email-templates.js';
 import { readFileSync, existsSync } from 'node:fs';
 
 const program = new Command();
@@ -246,15 +253,51 @@ program
     console.log('\nDone.\n');
   });
 
-// --- LinkedIn API ---
+// --- LinkedIn API (via MATON Gateway) ---
+
+program
+  .command('connect')
+  .description('Check or create LinkedIn connection via MATON')
+  .option('--create', 'create a new LinkedIn connection if none exists')
+  .action(async (opts) => {
+    try {
+      const conn = await getConnectionStatus();
+      if (!conn) {
+        if (opts.create) {
+          console.log('\nCreating LinkedIn connection...');
+          const { connectionId, authUrl } = await createConnection();
+          console.log(`\n🔗 LinkedIn connection created (${connectionId})`);
+          console.log(`\nAuthorize at:\n  ${authUrl}\n`);
+        } else {
+          console.log('\nNo LinkedIn connection found. Run with --create to set one up.\n');
+        }
+        return;
+      }
+
+      const icon = conn.status === 'ACTIVE' ? '✅' : conn.status === 'PENDING' ? '⏳' : '❌';
+      console.log(`\n${icon} LinkedIn connection: ${conn.status}`);
+      console.log(`   ID: ${conn.connection_id}`);
+      if (conn.status === 'PENDING') {
+        console.log(`\n   Authorize at:\n   ${conn.url}\n`);
+      }
+      if (conn.metadata && Object.keys(conn.metadata).length > 0) {
+        console.log(`   User: ${conn.metadata['name'] ?? conn.metadata['email'] ?? 'unknown'}`);
+      }
+      console.log();
+    } catch (err: any) {
+      console.error(`\n❌ ${err.message}\n`);
+      process.exit(1);
+    }
+  });
 
 program
   .command('verify')
-  .description('Verify LinkedIn API credentials')
+  .description('Verify LinkedIn API credentials via MATON gateway')
   .action(async () => {
     try {
-      const sub = await verifyCredentials();
-      console.log(`\n✅ LinkedIn credentials valid. User: ${sub}\n`);
+      const { sub, name } = await verifyCredentials();
+      console.log(`\n✅ LinkedIn connection active via MATON gateway`);
+      console.log(`   User: ${name} (${sub})\n`);
     } catch (err: any) {
       console.error(`\n❌ ${err.message}\n`);
       process.exit(1);
@@ -263,8 +306,9 @@ program
 
 program
   .command('post')
-  .description('Publish a post to LinkedIn (text only or text + image)')
+  .description('Publish a post to LinkedIn via MATON gateway (text only or text + image)')
   .argument('<post-id>', 'post ID from the content store')
+  .requiredOption('--author <urn>', 'LinkedIn person URN (e.g. urn:li:person:xxxxx)')
   .option('-i, --image <path>', 'path to image file to attach')
   .option('--dry-run', 'print what would be posted without actually posting')
   .action(async (postId, opts) => {
@@ -287,6 +331,7 @@ program
       console.log('\n--- DRY RUN ---');
       console.log(`Title: ${post.title}`);
       console.log(`Language: ${post.language}`);
+      console.log(`Author: ${opts.author}`);
       console.log(`Image: ${opts.image ?? 'none'}`);
       console.log(`\nBody:\n${text}\n`);
       return;
@@ -299,12 +344,12 @@ program
           process.exit(1);
         }
         console.log(`\nPublishing to LinkedIn with image...`);
-        const result = await postWithImage(text, opts.image, post.title);
+        const result = await postWithImage(text, opts.image, opts.author, post.title);
         console.log(`\n🚀 Published! Post ID: ${result.id}`);
         console.log(`   Image asset: ${result.imageAsset}`);
       } else {
         console.log(`\nPublishing to LinkedIn (text only)...`);
-        const result = await postText(text);
+        const result = await postText(text, opts.author);
         console.log(`\n🚀 Published! Post ID: ${result.id}`);
       }
 
@@ -319,8 +364,9 @@ program
 
 program
   .command('post-direct')
-  .description('Post arbitrary text directly to LinkedIn (bypasses content store)')
+  .description('Post arbitrary text directly to LinkedIn via MATON gateway')
   .argument('<text>', 'text content to post')
+  .requiredOption('--author <urn>', 'LinkedIn person URN (e.g. urn:li:person:xxxxx)')
   .option('-i, --image <path>', 'path to image file to attach')
   .action(async (text, opts) => {
     try {
@@ -330,13 +376,140 @@ program
           process.exit(1);
         }
         console.log(`\nPublishing to LinkedIn with image...`);
-        const result = await postWithImage(text, opts.image);
+        const result = await postWithImage(text, opts.image, opts.author);
         console.log(`\n🚀 Published! Post ID: ${result.id}\n`);
       } else {
         console.log(`\nPublishing to LinkedIn (text only)...`);
-        const result = await postText(text);
+        const result = await postText(text, opts.author);
         console.log(`\n🚀 Published! Post ID: ${result.id}\n`);
       }
+    } catch (err: any) {
+      console.error(`\n❌ ${err.message}\n`);
+      process.exit(1);
+    }
+  });
+
+// --- Email / Gmail via MATON ---
+
+program
+  .command('email-verify')
+  .description('Verify MATON Gmail credentials')
+  .action(async () => {
+    try {
+      const email = await verifyGmailCredentials();
+      console.log(`\n✅ Gmail credentials valid. Account: ${email}\n`);
+    } catch (err: any) {
+      console.error(`\n❌ ${err.message}\n`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('email-send')
+  .description('Send a custom email via MATON Gmail')
+  .requiredOption('-t, --to <email>', 'recipient email address')
+  .requiredOption('-s, --subject <subject>', 'email subject')
+  .requiredOption('-b, --body <html>', 'email HTML body (or path to .html file)')
+  .option('--dry-run', 'print email details without sending')
+  .action(async (opts) => {
+    let htmlBody = opts.body;
+    if (opts.body.endsWith('.html') && existsSync(opts.body)) {
+      htmlBody = readFileSync(opts.body, 'utf-8');
+    }
+
+    if (opts.dryRun) {
+      console.log('\n--- DRY RUN ---');
+      console.log(`To: ${opts.to}`);
+      console.log(`Subject: ${opts.subject}`);
+      console.log(`Body length: ${htmlBody.length} chars\n`);
+      return;
+    }
+
+    try {
+      console.log(`\nSending email to ${opts.to}...`);
+      const result = await sendEmail({
+        to: opts.to,
+        subject: opts.subject,
+        htmlBody,
+      });
+      console.log(`\n✅ Email sent! Message ID: ${result.id}`);
+      console.log(`   Thread ID: ${result.threadId}\n`);
+    } catch (err: any) {
+      console.error(`\n❌ ${err.message}\n`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('email-welcome')
+  .description('Send a bilingual welcome email to a consulting lead')
+  .requiredOption('-t, --to <email>', 'lead email address')
+  .option('-n, --name <name>', 'lead name')
+  .option('-c, --company <name>', 'lead company name')
+  .option('--dry-run', 'print email details without sending')
+  .action(async (opts) => {
+    const { subject, html } = welcomeEmail({
+      leadName: opts.name,
+      leadEmail: opts.to,
+      companyName: opts.company,
+    });
+
+    if (opts.dryRun) {
+      console.log('\n--- DRY RUN (Welcome Email) ---');
+      console.log(`To: ${opts.to}`);
+      console.log(`Name: ${opts.name ?? '(not provided)'}`);
+      console.log(`Subject: ${subject}`);
+      console.log(`Body length: ${html.length} chars\n`);
+      return;
+    }
+
+    try {
+      console.log(`\nSending welcome email to ${opts.to}...`);
+      const result = await sendEmail({ to: opts.to, subject, htmlBody: html });
+      console.log(`\n✅ Welcome email sent! Message ID: ${result.id}`);
+      console.log(`   Thread ID: ${result.threadId}\n`);
+    } catch (err: any) {
+      console.error(`\n❌ ${err.message}\n`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('email-newsletter')
+  .description('Send a bilingual AI insights newsletter')
+  .requiredOption('-t, --to <email>', 'recipient email address')
+  .requiredOption('-d, --data <path>', 'path to newsletter JSON data file')
+  .option('-n, --name <name>', 'recipient name')
+  .option('--issue <number>', 'newsletter issue number', '1')
+  .option('--dry-run', 'print email details without sending')
+  .action(async (opts) => {
+    if (!existsSync(opts.data)) {
+      console.error(`Newsletter data file not found: ${opts.data}`);
+      process.exit(1);
+    }
+
+    const data = JSON.parse(readFileSync(opts.data, 'utf-8'));
+    const { subject, html } = newsletterEmail({
+      recipientName: opts.name,
+      recipientEmail: opts.to,
+      articles: data.articles,
+      issueNumber: parseInt(opts.issue),
+    });
+
+    if (opts.dryRun) {
+      console.log('\n--- DRY RUN (Newsletter) ---');
+      console.log(`To: ${opts.to}`);
+      console.log(`Subject: ${subject}`);
+      console.log(`Articles: ${data.articles.length}`);
+      console.log(`Body length: ${html.length} chars\n`);
+      return;
+    }
+
+    try {
+      console.log(`\nSending newsletter to ${opts.to}...`);
+      const result = await sendEmail({ to: opts.to, subject, htmlBody: html });
+      console.log(`\n✅ Newsletter sent! Message ID: ${result.id}`);
+      console.log(`   Thread ID: ${result.threadId}\n`);
     } catch (err: any) {
       console.error(`\n❌ ${err.message}\n`);
       process.exit(1);
